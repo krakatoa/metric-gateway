@@ -41,7 +41,7 @@ func (r *RiemannTcp) Listen() {
   }
   defer l.Close()
 
-  log.Printf("listening on %s",r. listenAddress)
+  log.Printf("listening TCP on %s",r. listenAddress)
 
   for {
     conn, err := l.Accept()

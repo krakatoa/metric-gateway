@@ -42,10 +42,16 @@ func main() {
   //dClient := datadog.NewClient(*flagDatadogApiKey, "riemann")
 
   var riemannTcp *RiemannTcp = NewRiemannTcp(*flagHost, *flagPort, func(metric BaseMetric) {
-    log.Printf("Recv metric: %v", metric)
+    log.Printf("TCP Recv metric: %v", metric)
   })
 
   go riemannTcp.Listen()
+
+  var riemannUdp *RiemannUdp = NewRiemannUdp(*flagHost, *flagPort, func(metric BaseMetric) {
+    log.Printf("UDP Recv metric: %v", metric)
+  })
+
+  go riemannUdp.Listen()
 
   select {}
 }
