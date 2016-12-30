@@ -1,0 +1,23 @@
+{
+	"ImportPath": "github.com/krakatoa/metric-gateway",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v75",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/cenkalti/backoff",
+			"Comment": "v1.0.0-15-gb02f2bb",
+			"Rev": "b02f2bbce11d7ea6b97f282ef1771b0fe2f65ef3"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "8ee79997227bf9b34611aee7946ae64735e6fd93"
+		},
+		{
+			"ImportPath": "github.com/zorkian/go-datadog-api",
+			"Rev": "a0a72fc5e4cae721b5144ba785f07f4edcf2cd47"
+		}
+	]
+}

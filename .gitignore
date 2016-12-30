@@ -1,0 +1,7 @@
+src/*
+!src/metric-gateway
+
+pkg/
+release/
+
+src/metric-gateway/vendor/
