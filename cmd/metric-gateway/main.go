@@ -2,11 +2,7 @@ package main
 
 import (
   "flag"
-  "log"
-
-  //"github.com/zorkian/go-datadog-api"
-  //"github.com/oliveagle/boltq"
-  //"strconv"
+//  "log"
 )
 
 func main() {
@@ -14,45 +10,28 @@ func main() {
     flagHost          = flag.String("host", "localhost", "Listen host")
     flagPort          = flag.Int("port", 5555, "Listen port")
     //flagDatadogApiKey = flag.String("datadog-api-key", "", "Datadog Api Key")
-    // flagDatadogPrefix = flag.String("datadog-prefix", "riemann.", "Datadog metric prefix")
+    //flagDatadogPrefix = flag.String("datadog-prefix", "riemann.", "Datadog metric prefix")
   )
   flag.Parse()
 
-  //q, err := boltq.NewBoltQ("test_q.queue", 2000, boltq.POP_ON_FULL)
-  //defer q.Close()
+  var datadogExporter *DatadogExporter = NewDatadogExporter()
 
-  //for {
-  //  value, _ := q.Dequeue()
-  //  if value != nil {
-  //    log.Printf("value: %s", value)
-  //  }
-  //}
-
-  //i := 0
-  //for {
-  //  i += 1
-  //  err = q.Enqueue([]byte("value-" + strconv.Itoa(i)))
-  //  if err != nil {
-  //    log.Printf("err: %v", err)
-  //  } else {
-  //    log.Printf("stored: %d", i)
-  //  }
-  //}
-
-  //dClient := datadog.NewClient(*flagDatadogApiKey, "riemann")
+  defer datadogExporter.Close()
+  go datadogExporter.Consume()
 
   var riemannTcp *RiemannTcp = NewRiemannTcp(*flagHost, *flagPort, func(metric BaseMetric) {
-    log.Printf("TCP Recv metric: %v", metric)
+    // log.Printf("TCP Recv metric: %v", metric)
+    datadogExporter.Write(metric)
   })
 
   go riemannTcp.Listen()
 
   var riemannUdp *RiemannUdp = NewRiemannUdp(*flagHost, *flagPort, func(metric BaseMetric) {
-    log.Printf("UDP Recv metric: %v", metric)
+    // log.Printf("UDP Recv metric: %v", metric)
+    datadogExporter.Write(metric)
   })
 
   go riemannUdp.Listen()
 
   select {}
 }
-
