@@ -15,13 +15,18 @@ func main() {
   flag.Parse()
 
   var datadogExporter *DatadogExporter = NewDatadogExporter()
+  var riemannExporter *RiemannExporter = NewRiemannExporter()
 
   defer datadogExporter.Close()
   go datadogExporter.Consume()
 
+  defer riemannExporter.Close()
+  go riemannExporter.Consume()
+
   var riemannTcp *RiemannTcp = NewRiemannTcp(*flagHost, *flagPort, func(metric BaseMetric) {
     // log.Printf("TCP Recv metric: %v", metric)
     datadogExporter.Write(metric)
+    riemannExporter.Write(metric)
   })
 
   go riemannTcp.Listen()
@@ -29,6 +34,7 @@ func main() {
   var riemannUdp *RiemannUdp = NewRiemannUdp(*flagHost, *flagPort, func(metric BaseMetric) {
     // log.Printf("UDP Recv metric: %v", metric)
     datadogExporter.Write(metric)
+    riemannExporter.Write(metric)
   })
 
   go riemannUdp.Listen()

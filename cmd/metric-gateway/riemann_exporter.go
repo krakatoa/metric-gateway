@@ -9,31 +9,31 @@ import (
   "encoding/base64"
 
   "time"
-  "github.com/zorkian/go-datadog-api"
+//  "github.com/amir/raidman"
 )
 
-type DatadogExporter struct {
+type RiemannExporter struct {
   ticker        *time.Ticker
   queue         *boltq.BoltQ
 }
 
-func NewDatadogExporter() *DatadogExporter {
-  q, err := boltq.NewBoltQ("datadog.queue", 3000, boltq.POP_ON_FULL)
+func NewRiemannExporter() *RiemannExporter {
+  q, err := boltq.NewBoltQ("riemann.queue", 3000, boltq.POP_ON_FULL)
   if err != nil {
     panic("error opening bolq queue")
   }
 
-  return &DatadogExporter{
+  return &RiemannExporter{
     ticker:       time.NewTicker(time.Duration(1000) * time.Millisecond),
     queue:        q,
   }
 }
 
-func (d *DatadogExporter) Close() {
-  d.queue.Close()
+func (r *RiemannExporter) Close() {
+  r.queue.Close()
 }
 
-func (d *DatadogExporter) Write(metric BaseMetric) {
+func (r *RiemannExporter) Write(metric BaseMetric) {
   var bin bytes.Buffer
   enc := gob.NewEncoder(&bin)
   err := enc.Encode(metric)
@@ -42,17 +42,17 @@ func (d *DatadogExporter) Write(metric BaseMetric) {
   } else {
     base64Text := make([]byte, base64.StdEncoding.EncodedLen(len(bin.Bytes())))
     base64.StdEncoding.Encode(base64Text, bin.Bytes())
-    err = d.queue.Enqueue(base64Text)
+    err = r.queue.Enqueue(base64Text)
     log.Printf("Written: %v", base64Text)
 
-    log.Printf("Datadog QUEUE SIZE: %d", d.queue.Size())
+    log.Printf("Riemann QUEUE SIZE: %d", r.queue.Size())
   }
 }
 
-func (d *DatadogExporter) Consume() {
-  for _ = range d.ticker.C {
+func (r *RiemannExporter) Consume() {
+  for _ = range r.ticker.C {
     for i := 1; i <= 30; i++ {
-      value, _ := d.queue.Dequeue()
+      value, _ := r.queue.Dequeue()
       if value != nil {
         base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(value)))
         base64.StdEncoding.Decode(base64Text, value)
@@ -65,35 +65,24 @@ func (d *DatadogExporter) Consume() {
         if err != nil {
           log.Fatal("decode error:", err)
         } else {
-          d.exportMetric(metric)
+          r.exportMetric(metric)
         }
       } else {
         break
       }
     }
-    log.Printf("QUEUE SIZE: %d", d.queue.Size())
+    log.Printf("QUEUE SIZE: %d", r.queue.Size())
   }
 }
 
 // dClient := datadog.NewClient(*flagDatadogApiKey, "riemann")
-func (d *DatadogExporter) exportMetric(metric BaseMetric) {
+func (r *RiemannExporter) exportMetric(metric BaseMetric) {
   log.Printf("Deserialized: %v", metric)
-  var datadogMetric datadog.Metric = ToDatadog(metric, "datadog.") //*flagDatadogPrefix)
+  //var datadogMetric datadog.Metric = ToDatadog(metric, *flagDatadogPrefix)
 
-  metrics := make([]datadog.Metric, 1)
-  metrics = append(metrics, datadogMetric)
-  log.Printf("To Datadog: %v", metrics)
+  //metrics := make([]datadog.Metric, 1)
+  //metrics = append(metrics, datadogMetric)
+  //log.Printf("To Datadog: %v", metrics)
 
 //  dClient.PostMetrics(metrics)
-}
-
-func ToDatadog(metric BaseMetric, datadogPrefix string) datadog.Metric {
-  points := make([]datadog.DataPoint, 1)
-  points = append(points, datadog.DataPoint{metric.Time, metric.Measure})
-
-  return datadog.Metric{
-    Metric: datadogPrefix + metric.Metric,
-    Points: points,
-    Host: metric.Host,
-  }
 }
