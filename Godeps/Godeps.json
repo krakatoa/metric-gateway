@@ -7,6 +7,19 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/amir/raidman",
+			"Rev": "c74861fe6a7bb8ede0a010ce4485bdbb4fc4c985"
+		},
+		{
+			"ImportPath": "github.com/amir/raidman/proto",
+			"Rev": "c74861fe6a7bb8ede0a010ce4485bdbb4fc4c985"
+		},
+		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.3.0-52-gb9eb643",
+			"Rev": "b9eb643780505525197ad791e275fc7ebc208bc8"
+		},
+		{
 			"ImportPath": "github.com/cenkalti/backoff",
 			"Comment": "v1.0.0-15-gb02f2bb",
 			"Rev": "b02f2bbce11d7ea6b97f282ef1771b0fe2f65ef3"
@@ -16,8 +29,20 @@
 			"Rev": "8ee79997227bf9b34611aee7946ae64735e6fd93"
 		},
 		{
+			"ImportPath": "github.com/oliveagle/boltq",
+			"Rev": "92e945cb3b44861362e8ba795f8d8f9a746e734e"
+		},
+		{
 			"ImportPath": "github.com/zorkian/go-datadog-api",
 			"Rev": "a0a72fc5e4cae721b5144ba785f07f4edcf2cd47"
+		},
+		{
+			"ImportPath": "golang.org/x/net/proxy",
+			"Rev": "45e771701b814666a7eb299e6c7a57d0b1799e91"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "d75a52659825e75fff6158388dddc6a5b04f9ba5"
 		}
 	]
 }
