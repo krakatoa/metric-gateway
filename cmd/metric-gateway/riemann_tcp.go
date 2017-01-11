@@ -17,11 +17,11 @@ var tcpOkResponseBytes []byte = tcpOkResponse()
 type RiemannTcp struct {
   Host          string
   Port          int
-  handler       func(BaseMetric)
+  handler       func([]BaseMetric)
   listenAddress string
 }
 
-func NewRiemannTcp(host string, port int, handler func(BaseMetric)) *RiemannTcp {
+func NewRiemannTcp(host string, port int, handler func([]BaseMetric)) *RiemannTcp {
   var listenAddress string
   listenAddress = host + ":" + strconv.Itoa(port)
 
@@ -57,7 +57,7 @@ func (r *RiemannTcp) Listen() {
 func (r *RiemannTcp) connectionHandler(conn net.Conn) {
   defer conn.Close()
   for {
-    buf := make([]byte, 1024)
+    buf := make([]byte, 4096)
 
     _, err := conn.Read(buf)
     if err != nil {
@@ -67,9 +67,9 @@ func (r *RiemannTcp) connectionHandler(conn net.Conn) {
         return
       }
     } else {
-      metric := ParseRiemann(protobufPayload(buf))
-      r.handler(metric)
-
+      metrics := ParseRiemann(protobufPayload(buf))
+      // log.Printf("metrics: %v", metrics)
+      r.handler(metrics)
       conn.Write(tcpOkResponseBytes)
     }
   }

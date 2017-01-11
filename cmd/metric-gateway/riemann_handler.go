@@ -16,28 +16,33 @@ type BaseMetric struct {
   Time    float64
 }
 
-func ParseRiemann(binary []byte) BaseMetric {
+func ParseRiemann(binary []byte) []BaseMetric {
   msg := &riemann_proto.Msg{}
   if err := proto.Unmarshal(binary, msg); err != nil {
     log.Printf("error deserializing protobuf: %s", err.Error())
   }
 
+  var baseMetrics []BaseMetric = make([]BaseMetric, 0)
   var service string
-  service = "prefix." + strings.Replace(strings.Replace(strings.Replace(msg.Events[0].GetService(), "/", "_", -1), " ", ".", -1), "|", "_", -1)
-
   var measure float64
-  if msg.Events[0].MetricSint64 != nil {
-    measure = float64(msg.Events[0].GetMetricSint64())
-  } else if msg.Events[0].MetricF != nil {
-    measure = float64(msg.Events[0].GetMetricF())
-  } else if msg.Events[0].MetricD != nil {
-    measure = float64(msg.Events[0].GetMetricD())
+
+  for _, protoEvent := range msg.Events {
+    service = strings.Replace(strings.Replace(strings.Replace(protoEvent.GetService(), "/", "_", -1), " ", ".", -1), "|", "_", -1)
+
+    if protoEvent.MetricSint64 != nil {
+      measure = float64(protoEvent.GetMetricSint64())
+    } else if protoEvent.MetricF != nil {
+      measure = float64(protoEvent.GetMetricF())
+    } else if protoEvent.MetricD != nil {
+      measure = float64(protoEvent.GetMetricD())
+    }
+    baseMetrics = append(baseMetrics, BaseMetric{
+      Metric: service,
+      Measure: measure,
+      Host: protoEvent.GetHost(),
+      Time: float64(protoEvent.GetTime()),
+    })
   }
 
-  return BaseMetric{
-    Metric: service,
-    Measure: measure,
-    Host: msg.Events[0].GetHost(),
-    Time: float64(msg.Events[0].GetTime()),
-  }
+  return baseMetrics
 }

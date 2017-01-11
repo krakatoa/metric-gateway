@@ -118,7 +118,6 @@ func (r *RiemannExporter) exportMetrics(metrics []BaseMetric) error {
     riemannEvents = append(riemannEvents, &riemannEvent)
   }
 
-  log.Printf("To Riemann batch: %v", riemannEvents)
   if err := r.client.SendMulti(riemannEvents); err != nil {
     return err
   }
@@ -128,7 +127,7 @@ func (r *RiemannExporter) exportMetrics(metrics []BaseMetric) error {
 func ToRiemann(metric BaseMetric) raidman.Event {
 	var event = raidman.Event{
 		State:      "ok",
-		Service:    metric.Metric,
+		Service:    "prefix." + metric.Metric,
 		Metric:     metric.Measure,
     Host:       metric.Host,
 		//Attributes: [], //baseEvent.Attributes,

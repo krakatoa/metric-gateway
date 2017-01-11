@@ -10,11 +10,11 @@ import (
 type RiemannUdp struct {
   Host          string
   Port          int
-  handler       func(BaseMetric)
+  handler       func([]BaseMetric)
   listenAddress *net.UDPAddr
 }
 
-func NewRiemannUdp(host string, port int, handler func(BaseMetric)) *RiemannUdp {
+func NewRiemannUdp(host string, port int, handler func([]BaseMetric)) *RiemannUdp {
   var listenAddress string
   listenAddress = host + ":" + strconv.Itoa(port)
 
@@ -46,7 +46,7 @@ func (r *RiemannUdp) Listen() {
 func (r *RiemannUdp) connectionHandler(conn *net.UDPConn) {
   defer conn.Close()
 
-  buf := make([]byte, 1024)
+  buf := make([]byte, 4096)
 
   for {
     //_, err := conn.Read(buf)
@@ -55,8 +55,8 @@ func (r *RiemannUdp) connectionHandler(conn *net.UDPConn) {
     if err != nil {
       log.Printf("err: %s", err.Error())
     } else {
-      metric := ParseRiemann(buf[0:n])
-      r.handler(metric)
+      metrics := ParseRiemann(buf[0:n])
+      r.handler(metrics)
     }
 
   }

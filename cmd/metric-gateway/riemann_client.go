@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+//	"log"
 
 	"github.com/amir/raidman"
   "strconv"
@@ -43,7 +43,7 @@ func (r *RiemannClient) SendMulti(events []*raidman.Event) error {
     }
   }
 
-	log.Printf("Events: %v", events)
+	//log.Printf("Events: %v", events)
 	err := r.client.SendMulti(events)
 	if err != nil {
 		// log.Println("error sending Riemann event: %s", err)
