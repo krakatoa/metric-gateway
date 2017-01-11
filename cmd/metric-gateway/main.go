@@ -14,7 +14,7 @@ func main() {
     flagRiemannHost     = flag.String("riemann-host", "", "Riemann host")
     flagRiemannPort     = flag.Int("riemann-port", 5555, "Riemann port")
     flagRiemannFlushRate      = flag.Int("riemann-flush-rate", 1, "Riemann flush rate in seconds")
-    flagRiemannFlushBatchSize = flag.Int("riemann-flush-batch-size", 30, "Riemann max messages per batch flush")
+    flagRiemannFlushBatchSize = flag.Int("riemann-flush-batch-size", 50, "Riemann max messages per batch flush")
     flagRiemannMaxQueueSize = flag.Int("riemann-max-queue-size", 30000, "Riemann max queue size")
 
     flagDatadogEnabled  = flag.Bool("datadog-enabled", false, "Enable Datadog exporter")
@@ -43,17 +43,21 @@ func main() {
     go datadogExporter.Consume()
   }
 
-  var riemannTcp *RiemannTcp = NewRiemannTcp(*flagHost, *flagPort, func(metric BaseMetric) {
-    // log.Printf("TCP Recv metric: %v", metric)
-    if *flagDatadogEnabled { datadogExporter.Write(metric) }
-    if *flagRiemannEnabled { riemannExporter.Write(metric) }
+  var riemannTcp *RiemannTcp = NewRiemannTcp(*flagHost, *flagPort, func(metrics []BaseMetric) {
+    // log.Printf("TCP Recv metric: %v", metrics)
+    for _, metric := range metrics {
+      if *flagDatadogEnabled { datadogExporter.Write(metric) }
+      if *flagRiemannEnabled { riemannExporter.Write(metric) }
+    }
   })
   go riemannTcp.Listen()
 
-  var riemannUdp *RiemannUdp = NewRiemannUdp(*flagHost, *flagPort, func(metric BaseMetric) {
-    // log.Printf("UDP Recv metric: %v", metric)
-    if *flagDatadogEnabled { datadogExporter.Write(metric) }
-    if *flagRiemannEnabled { riemannExporter.Write(metric) }
+  var riemannUdp *RiemannUdp = NewRiemannUdp(*flagHost, *flagPort, func(metrics []BaseMetric) {
+    //log.Printf("UDP Recv metric: %v", metrics)
+    for _, metric := range metrics {
+      if *flagDatadogEnabled { datadogExporter.Write(metric) }
+      if *flagRiemannEnabled { riemannExporter.Write(metric) }
+    }
   })
   go riemannUdp.Listen()
 

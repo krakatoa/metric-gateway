@@ -12,6 +12,7 @@ import (
   "encoding/base64"
 
   "time"
+//  "github.com/pkg/profile"
 )
 
 type RiemannExporter struct {
@@ -60,11 +61,12 @@ func (r *RiemannExporter) Write(metric BaseMetric) {
     base64.StdEncoding.Encode(base64Text, bin.Bytes())
     err = r.queue.Enqueue(base64Text)
 
-    log.Printf("event=write riemann.queue_size=%d", r.queue.Size())
+    // log.Printf("event=write riemann.queue_size=%d", r.queue.Size())
   }
 }
 
 func (r *RiemannExporter) Consume() {
+  // defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop() //, profile.NoShutdownHook)
   for _ = range r.ticker.C {
     queueSize := r.queue.Size()
     log.Printf("Riemann Consume queueSize: %d", queueSize)
@@ -118,7 +120,6 @@ func (r *RiemannExporter) exportMetrics(metrics []BaseMetric) error {
     riemannEvents = append(riemannEvents, &riemannEvent)
   }
 
-  log.Printf("To Riemann batch: %v", riemannEvents)
   if err := r.client.SendMulti(riemannEvents); err != nil {
     return err
   }
@@ -128,7 +129,7 @@ func (r *RiemannExporter) exportMetrics(metrics []BaseMetric) error {
 func ToRiemann(metric BaseMetric) raidman.Event {
 	var event = raidman.Event{
 		State:      "ok",
-		Service:    metric.Metric,
+		Service:    "prefix." + metric.Metric,
 		Metric:     metric.Measure,
     Host:       metric.Host,
 		//Attributes: [], //baseEvent.Attributes,
