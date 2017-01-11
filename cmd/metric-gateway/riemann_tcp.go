@@ -56,16 +56,16 @@ func (r *RiemannTcp) Listen() {
 
 func (r *RiemannTcp) connectionHandler(conn net.Conn) {
   defer conn.Close()
+
+  var buf []byte = make([]byte, 4096)
   for {
-    buf := make([]byte, 4096)
+    buf = buf[:cap(buf)]
 
     _, err := conn.Read(buf)
     if err != nil {
-      if err.Error() != "EOF" {
-        log.Printf("error reading: ", err.Error())
-        conn.Close()
-        return
-      }
+      log.Printf("error reading: ", err.Error())
+      conn.Close()
+      return
     } else {
       metrics := ParseRiemann(protobufPayload(buf))
       // log.Printf("metrics: %v", metrics)

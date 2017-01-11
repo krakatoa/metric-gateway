@@ -44,7 +44,7 @@ func main() {
   }
 
   var riemannTcp *RiemannTcp = NewRiemannTcp(*flagHost, *flagPort, func(metrics []BaseMetric) {
-    log.Printf("TCP Recv metric: %v", metrics)
+    // log.Printf("TCP Recv metric: %v", metrics)
     for _, metric := range metrics {
       if *flagDatadogEnabled { datadogExporter.Write(metric) }
       if *flagRiemannEnabled { riemannExporter.Write(metric) }
