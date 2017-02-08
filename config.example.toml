@@ -1,0 +1,71 @@
+[server]
+# Input methods for MetricGateway are: riemann, http. At least one must be defined.
+
+  [riemann]
+  host = "0.0.0.0"
+  port = 5555
+
+  [http]
+  address = "0.0.0.0"
+  port = 8905
+
+[routes]
+# Route matching is done in sequence. For each given route to match, all of its regexes should match. If a route has the 'continue' flag set as true, it will keep matching on the rest of the routes.
+
+  [datadog]
+  # service = ".*"
+  # host = ".*"
+  # attr_layer = "^opse$"
+  endpoints = ["datadog"]
+  continue = true # default is false
+
+  [subset_a]
+  # service = ".*"
+  # host = ".*"
+  # attr_layer = "^opse$"
+  endpoints = ["riemann_a"]
+  # continue = false
+
+  [subset_b]
+  # service = ".*"
+  # host = ".*"
+  # attr_layer = "^opse$"
+  endpoints = ["riemann_b"]
+  # continue = false
+
+  [default]
+  # service = ".*"
+  # host = ".*"
+  endpoints = ["riemann_generic"]
+  # continue = false
+
+[endpoints]
+# If sharding over multiple Riemann servers, follow this example which uses LeaderElection with Consul, and consul-template to dynamically generate this file and reload MetricGateway
+  [datadog]
+  api_key = "$datadog_api_key"
+  app_key = "$datadog_app_key"
+  # flush_batch_size = 30
+  # flush_rate = 1
+  # max_queue_size = 30000
+  # prefix = "riemann"
+
+  [riemann_a]
+  host = "riemann_a.test.com"
+  # port = 5555
+  # flush_batch_size = 50
+  # flush_rate = 1
+  # max_queue_size = 30000
+
+  [riemann_b]
+  host = "riemann_b.test.com"
+  port = 5555
+  # flush_batch_size = 50
+  # flush_rate = 1
+  # max_queue_size = 30000
+
+  [riemann_generic]
+  host = "riemann_generic.test.com"
+  port = 5555
+  # flush_batch_size = 50
+  # flush_rate = 1
+  # max_queue_size = 30000
